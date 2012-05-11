@@ -1,0 +1,4 @@
+<select name="language" id="language">
+<option value="">[[%translex.please_choose? &namespace=`translex`]]
+[[+languages]]
+</select>

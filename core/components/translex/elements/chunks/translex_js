@@ -1,0 +1,349 @@
+<script>
+  //autoresize textareas plugin
+  // Autosize 1.6 - jQuery plugin for textareas
+// (c) 2011 Jack Moore - jacklmoore.com
+// license: www.opensource.org/licenses/mit-license.php
+(function(a,b){var c="hidden",d='<textarea style="position:absolute; top:-9999px; left:-9999px; right:auto; bottom:auto; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden">',e=["fontFamily","fontSize","fontWeight","fontStyle","letterSpacing","textTransform","wordSpacing"],f="oninput",g="onpropertychange",h=a(d)[0];h.setAttribute(f,"return"),a.isFunction(h[f])||g in h?a.fn.autosize=function(b){return this.each(function(){function o(){var a,b;m||(m=!0,j.value=h.value,j.style.overflowY=h.style.overflowY,j.style.width=i.css("width"),j.scrollTop=0,j.scrollTop=9e4,a=j.scrollTop,b=c,a>l?(a=l,b="scroll"):a<k&&(a=k),h.style.overflowY=b,h.style.height=h.style.minHeight=h.style.maxHeight=a+"px",setTimeout(function(){m=!1},1))}var h=this,i=a(h).css({overflow:c,overflowY:c,wordWrap:"break-word"}),j=a(d).addClass(b||"autosizejs")[0],k=i.height(),l=parseInt(i.css("maxHeight"),10),m,n=e.length;l=l&&l>0?l:9e4;while(n--)j.style[e[n]]=i.css(e[n]);a("body").append(j),g in h?f in h?h[f]=h.onkeyup=o:h[g]=o:h[f]=o,a(window).resize(o),i.bind("autosize",o),o()})}:a.fn.autosize=function(){return this}})(jQuery);
+  
+  
+var firstload = false;
+  $(document).ready(function(){
+    $('#topic').attr('disabled','disabled');
+    $('#language').attr('disabled','disabled');
+    setOptions();
+    $('.translex_btn_save').attr('disabled','disabled');
+    [[+modx.user.id:is=`1`:then=`
+      $('.translex_btn_live').attr('disabled','disabled');
+      $('#btn_log_load').click(function(){loadLog();});
+      $('#btn_log_clear').attr('disabled','disabled').click(function(){clearLog();});
+      $('#translex_div_log_viewer_container').slideDown();
+      `]]
+    
+    $('#translex_div_status').hide();
+    if($('#package')){
+       $('#package').change(function(){
+	 clearData();
+	 $('#topic').attr('disabled','disabled').val();
+	 $('#language').attr('disabled','disabled');
+	 $('#language').find('option:first').attr('selected', 'selected').parent('select');
+	 update(this.id);
+       });
+    }
+    if($('#topic')){
+      $('#topic').change(function(){
+	$('#language').attr('disabled','disabled');
+	$('#language').find('option:first').attr('selected', 'selected').parent('select');
+	clearData(); 
+	update(this.id);
+      });
+    }
+    if($('#language')){
+       $('#language').change(function(){
+	 clearData();
+	 update(this.id);
+       });
+    }
+    
+    $('.translex_btn_save').click(function(){
+      disableFields();
+      clearError();
+      showStatus('save');
+      var lexstr = '';
+      $('#translex_tbl_data textarea').each(function(){
+      	var lex = encodeURIComponent($(this).attr('name')) + '=' + encodeURIComponent($(this).val());
+	lexstr += '&' + lex;
+      });
+      lexstr = 'a=s&p=' + $('#package').val() + '&t=' + $('#topic').val() + '&l=' + $('#language').val() + lexstr;
+      $.post('[[~[[*id]]? &scheme=`full`]]',lexstr,function(data){
+	hideStatus();
+	if(data['success'] == 1){
+	    alert(data['message']);
+	}else{
+	    doError(data['message']);
+	}
+	enableFields();
+      },'json');
+    });
+    
+     $('.translex_btn_live').click(function(){
+      disableFields();
+       clearError();
+      showStatus('commit');
+      var lexstr = '';
+      $('#translex_tbl_data textarea').each(function(){
+      	var lex = encodeURIComponent($(this).attr('name')) + '=' + encodeURIComponent($(this).val());
+	lexstr += '&' + lex;
+      });
+      lexstr = 'a=c&p=' + $('#package').val() + '&t=' + $('#topic').val() + '&l=' + $('#language').val() + lexstr;
+      $.post('[[~[[*id]]? &scheme=`full`]]',lexstr,function(data){
+	hideStatus();
+	if(data['success'] == 1){
+	    clearData();
+	    update('language');
+	    alert(data['message']);
+	}else{
+	    doError(data['message']);
+	}
+	enableFields();
+      },'json');
+    });
+    
+  });
+    
+    function update(oid){
+     clearError();
+      showStatus(oid);
+      $.post('[[~[[*id]]? &scheme=`full`]]',{'o':oid,'p':$('#package').val(),'l':$('#language').val(),'t':$('#topic').val()},function(data){callback(data)},'json');
+    }
+    
+    function callback(response){
+      hideStatus();
+      if(response['success'] == 0){
+      	doError(response['message']);
+      }else{
+	if(response['topics']){
+	    $('#topic').find('option').remove();
+	  if(response['topics'].length > 1){
+	    $('#topic').append('<option value="">[[%translex.please_choose? &namespace=`translex`]]</option>');
+	  }
+            $.each(response['topics'], function(key,topic) {   
+     	        $('#topic')
+                    .append($("<option></option>")
+                    .attr("value",topic)
+                    .text(topic)); 
+	   });
+	  if(response['topics'].length == 1){
+	    update('topic');
+	  }else{
+	    $('#topic').removeAttr('disabled');
+	 }
+ 	}else{
+	  data = response['data'];
+	  
+	  if(data.length > 0){
+	      doTable(data);
+	    if($('#language option').length > 2){
+	       $('#language').removeAttr('disabled');
+	    }
+	      if(response['ready'] == 1){
+		keys = response['keys'];
+		setFields(keys);
+	    }
+	  }
+	}
+	
+      }
+    }
+  
+  function doTable(rows){
+   $('#translex_div_data').append('<table id="translex_tbl_data"/>');
+    var tbl_data = $('#translex_tbl_data');
+    tbl_data.attr('id','translex_tbl_data');
+  $('#translex_tbl_data').append('<thead/>');
+  var thead = $('#translex_tbl_data > thead');
+    thead.append('<tr><th>[[%translex.table_heading_key? &namespace=`translex`]]</th><th>[[%translex.table_heading_value? &namespace=`translex`]]</th></tr>');
+    tbl_data.append('<tbody/>');
+    tbody = $('#translex_tbl_data tbody');
+    tbody.attr('id','translex_tbody').addClass('translex_tbody');
+	
+	  	for(i = 0; i < rows.length; i++){
+		  if(i%2){cssCls='translex_altrow';}else{cssCls='translex_row';}
+	          $('<tr class="' + cssCls + '"><td class="td_key">' + rows[i]['key'] + '</td><td class="td_value">' + rows[i]['value'] + '</td></tr>').appendTo($('#translex_tbody'));
+	  	}
+	
+	      if(firstload){
+	      $('#language option:contains([[%translex.please_choose? &namespace=`translex`]])').remove();
+	      clearData();
+	      update('language');
+	      firstload = false;
+	    }
+    if($('#translex_tbl_data tbody tr').length > 5){
+      $('#translex_div_data').append('<p class="translex_p_top_link"><a class="translex_a_top_link" href="#top">[[%translex.top_link_text? &namespace=`translex`]]</a></p>');
+    }
+  }
+  
+  function doError(message){
+    $('#translex_div_error').html('<p><b>Error:</b> ' + message + '</p>').slideDown();
+  }
+  
+  function clearError(){
+  $('#translex_div_error').slideUp().html('');
+  }
+  
+  function clearData(){
+    $('#translex_tbl_data').remove();
+    $('#translex_div_data').slideUp().html('').slideDown();
+    $('.translex_btn_save').attr('disabled','disabled');
+    [[+modx.user.id:is=`1`:then=`
+      $('.translex_btn_live').attr('disabled','disabled');
+      `]]
+	 }
+  function showStatus(oid){
+    switch(oid){
+      case 'package':
+	$('#translex_div_status').html('[[%translex.fetching_topics? &namespace=`translex`]]');
+        break;	
+	  case 'topic':
+	$('#translex_div_status').html('[[%translex.fetching_keys_and_values? &namespace=`translex`]]');
+	break;
+      case 'language':
+	$('#translex_div_status').html('[[%translex.retrieving_language_entries? &namespace=`translex`]]');
+	break;
+      case 'save':
+	$('#translex_div_status').html('[[%translex.saving? &namespace=`translex`]]');
+	break;
+      case 'commit':
+	$('#translex_div_status').html('[[%translex.saving? &namespace=`translex`]]');
+	break;
+      case 'load_log':
+	$('#translex_div_status').html('[[%translex.loading_log_file? &namespace=`translex`]]');
+	break;
+      case 'clear_log':
+	$('#translex_div_status').html('[[%translex.clearing_log_file? &namespace=`translex`]]');
+	break;
+				       		       
+  }
+$('#translex_div_status').slideDown();				       
+				       }
+				       
+        function hideStatus(){
+	$('#translex_div_status').slideUp();
+	  $('#translex_div_status').html('');
+	}
+  
+  function setFields(keys){
+    if(keys == null || keys.length == 0){
+      $('#translex_tbl_data tr').each(function(){
+	key = $(this).find('td.td_key').html();
+	$(this).find($('td.td_value')).append('<div class="translex_div_edit"><p><label>[[%translex.contribute? &namespace=`translex`]]</label><br/><textarea name="' + key + '" placeholder="[[%translex.translate_value_above? &namespace=`translex`]] ' + $('#language').val() + '"></textarea></p></div>');
+      $(this).find($('.translex_div_edit')).addClass('translex_pending');
+      });
+    }else{
+      for(i = 0; i < keys.length; i++){
+	key = keys[i].key;
+	$('#translex_tbl_data tbody tr').each(function(){
+	tblkey = $(this).find('td.td_key').html();
+	  if(key == tblkey){
+	  live = keys[i]['values']['live'];
+	  working = keys[i]['values']['working'];
+	    $(this).find('td.td_value').append('<div class="translex_div_edit"></div>');
+	    if(live.length > 0){
+	      $(this).find('td.td_value div.translex_div_edit').append('<p><label>[[%translex.current_live_value? &namespace=`translex`]]</label><br/>' + live + '</p>');
+	    }
+	    $(this).find('td.td_value div.translex_div_edit').append('<p><label>[[%translex.contribute? &namespace=`translex`]]</label><br/><textarea rows="1" name="' + key + '" placeholder="[[%translex.translate_value_above? &namespace=`translex`]] ' + $('#language').val() + '">' + working + '</textarea></p>');
+	  return;
+	  }
+	})
+      }
+      $('#translex_tbl_data tbody tr').each(function(){
+	if($(this).find('textarea').length == 0){
+		$(this).find($('td.td_value')).append('<div class="translex_div_edit"><p><label>[[%translex.contribute? &namespace=`translex`]]</label><br/><textarea name="' + key + '" placeholder="[[%translex.translate_value_above? &namespace=`translex`]] ' + $('#language').val() + '"></textarea></p></div>');
+      		$(this).find($('.translex_div_edit')).addClass('translex_pending');
+	}
+      });
+    }
+    $('#translex_tbl_data tr').each(function(){
+      $(this).find('textarea').each(function(){
+        $(this).autosize();
+	if($(this).val().length < 2){
+	   $(this).parent().parent().removeClass('translex_complete');
+	   $(this).parent().parent().addClass('translex_pending');
+	   }else{
+	   $(this).parent().parent().removeClass('translex_pending');
+	   $(this).parent().parent().addClass('translex_complete');
+	}
+      });
+      
+      
+      $(this).find('textarea').blur(function(){
+	if($(this).val().length < 2){
+	   $(this).parent().parent().removeClass('translex_complete');
+	   $(this).parent().parent().addClass('translex_pending');
+	   }else{
+	   $(this).parent().parent().removeClass('translex_pending');
+	   $(this).parent().parent().addClass('translex_complete');
+	   }
+      })
+    });
+    $('.translex_btn_save').removeAttr('disabled');
+    [[+modx.user.id:is=`1`:then=`
+      $('.translex_btn_live').removeAttr('disabled');
+      `]]
+  }
+  
+  function setOptions(){
+    if($('#package option').length == 2 && $('#language option').length == 2){
+      $('#translex_p_intro').hide();
+    }
+    if($('#package option').length == 2){
+      $('#package option:contains([[%translex.please_choose? &namespace=`translex`]])').remove(); 
+     update('package');
+      $('#package').attr('disabled','disabled');
+    }
+    if($('#language option').length == 2){
+      firstload = true; 
+    }  
+  }
+  
+  function enableFields(){
+    $(':input').each(function(){
+      if($(this).attr('id') == 'package' || $(this).attr('id') == 'topic' || $(this).attr('id') == 'language'){
+	if($('option', this).length > 2){
+	 $(this).removeAttr('disabled');
+	}
+	 }else{
+      $(this).removeAttr('disabled');
+    }
+    })  
+  }
+  function disableFields(){$(':input').attr('disabled','disabled');}
+  
+  [[+modx.user.id:is=`1`:then=`
+    function loadLog(){
+        clearError();
+        showStatus('load_log');
+    $('#btn_log_load').attr('disabled','disabled');
+    $('#btn_log_clear').attr('disabled','disabled');
+    $('#translex_div_log_viewer').slideUp().html('');
+    $.post('[[~[[*id]]? &scheme=`full`]]',{'a':'lf'},function(data){
+    if(data['success'] == 1){
+        
+   	if(data['log'] == null || data['log'].length < 1){
+    		doError(data['message']);
+        }else{
+	  for(i = 0; i < data['log'].length; i++){
+	    if(data['log'][i] != false){
+	    $('#translex_div_log_viewer').append(data['log'][i]);
+	    }
+	  }
+	  	$('#translex_div_log_viewer').slideDown();
+	}
+    }else{
+    	doError(data['message']);
+    }
+    
+   hideStatus();
+   $('#btn_log_load').removeAttr('disabled');
+  $('#btn_log_clear').removeAttr('disabled');
+   $('#btn_log_load').html('[[%translex.reload_log_file? &namespace=`translex`]]')
+    },'json');
+      
+    }
+      
+      function clearLog(){
+        clearError();  
+	showStatus('clear_log');
+	$('#btn_log_load').attr('disabled','disabled');
+    $('#btn_log_clear').attr('disabled','disabled');
+    $('#translex_div_log_viewer').slideUp().html('');
+    $.post('[[~[[*id]]? &scheme=`full`]]',{'a':'dlf'},function(data){
+    alert(data['message']);
+      
+       hideStatus();
+   $('#btn_log_load').removeAttr('disabled');
+  $('#btn_log_clear').removeAttr('disabled');
+    },'json');
+    } 
+  `]]
+  
+</script>

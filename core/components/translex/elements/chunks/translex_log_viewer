@@ -1,0 +1,7 @@
+[[+modx.user.id:is=`1`:then=`
+<div id="translex_div_log_viewer_container">
+  <button id="btn_log_load">[[%translex.load_log_file? &namespace=`translex`]]</button> 
+  &nbsp;
+    <button id="btn_log_clear">[[%translex.clear_log_file? &namespace=`translex`]]</button>
+  <div id="translex_div_log_viewer"></div>
+</div>`]]
