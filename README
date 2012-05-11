@@ -1,5 +1,5 @@
 TransleX - 1.0
-=================================
+==============
 First Released: April 21st, 2012
 Author: Joe Molloy <info@hyper-typer.com>
 License: GNU GPLv2 (or later at your option)
@@ -15,7 +15,7 @@ he has generously released it as open source (GPL v2+) to benefit others with si
 
 
 Instructions
------------------------------------
+------------
 1. Install via package manager
 2. Create a resource where you want to display the form, setting its template to blank and disabling the Rich Text Editor 
 and caching.  You should protect this page by adding it to a resource group accessible by the user(s) you which to give 
@@ -25,7 +25,7 @@ access to.
 
 
 Usage
------------------------------------
+-----
 By default, all packages within the components directory will be displayed - to restrict access to one or more packages 
 simply add a 'packages' property with a comma delimited list of packages as its value these package names should be taken 
 from the package's corresponding folder in the components directory.  For example to restrict access
@@ -57,7 +57,7 @@ operation of the tool.  For more information, see the log property below.  This 
 when used under the site adminstrator account, i.e. user_id = 1.
 
 Properties
---------------------------------
+----------
 **packages:**		
 A comma delimited list of the package names you wish the translator to work with.  These names are the same as the folder names 
 in the core/components directory.
@@ -91,7 +91,7 @@ http://hyper-typer.com/news/modx-lexicon-translation-tool-translex
 
 
 Licensing
-----------------------------------------
+---------
 This addon is licensed under the GPL Public License Version 2 (or higher) and you should have received a copy of same along 
 with this addon.
 
