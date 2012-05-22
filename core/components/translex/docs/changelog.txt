@@ -36,7 +36,7 @@ April 22nd, 2012: Post foreign lexicon addition fixes
 4. Replaced htmlentites function with a UTF8-safe version
 5. Changed the 'Edit' label and lexicon key to 'Contribute'
 
-Version 1.0 Final
+Version 1.0 pl2
 ------------------
 1. Various fixes to naming consistencies in lexicon topic file
 2. Addition of adminNotify parameter for snippet call 
