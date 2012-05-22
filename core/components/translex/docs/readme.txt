@@ -82,7 +82,7 @@ log: 			A comma delimited list of events you would like to log.  Valid options a
 
 
 You may also read this documentation at:
-http://hyper-typer.com/modx-lexicon-translation-tool
+http://hyper-typer.com/news/modx-lexicon-translation-tool-translex
 
 
 Licensing
