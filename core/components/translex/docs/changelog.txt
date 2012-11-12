@@ -52,4 +52,4 @@ June 13th, 2012:  New default lexicon item fixes
 
 Version 1.0 pl4
 ------------------
-November 12th, 2012; Fixed typo preventing the limiting of the available package list to those specified
+November 12th, 2012; Fixed typo preventing the limiting of the available package list to those specified.
