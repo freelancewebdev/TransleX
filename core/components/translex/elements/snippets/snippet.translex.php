@@ -46,12 +46,12 @@ if(!function_exists('getSettings')){
 			$packagename = str_replace($packages_path,'',$packagedir);
 			if(count($packagesAr) > 0){
 				if(in_array($packagename,$packagesAr)){	
-					$packageist[] = $packagename;
+					$packagelist[] = $packagename;
 				}
 			}else{
 				$packagelist[] = $packagename;
 			}
-			
+
 		}
 		sort($packagelist);
 		$languagesstr = $options['languages'];
@@ -71,7 +71,7 @@ if(!function_exists('getSettings')){
 if(!function_exists('html_encode')){
 function html_encode($var)
 {
-	return htmlentities($var, ENT_QUOTES, 'UTF-8');
+	return htmlentities($var, ENT_QUOTES, 'UTF-8') ;
 }
 }
 if(!function_exists('doJSON')){
@@ -119,7 +119,7 @@ if(!function_exists('doInterface')){
 				exit();
 			}
 		}
-		
+
 		foreach($packagelist as $packagename){
 			$innerpackages .= $modx->getChunk('translex_package_list_row',array('package' => $packagename));
 		}
@@ -131,7 +131,7 @@ if(!function_exists('doInterface')){
 			$innerlanguages .= $modx->getChunk('translex_language_list_row',array('language' => $language));
 		}
 		$outerlanguages = $modx->getChunk('translex_language_list_container',array('languages' => $innerlanguages));	
-		
+
 		$outertopics = $modx->getChunk('translex_topic_list_container');
 		$settings_form_elements = array(
 			'packages' => $outerpackages,
@@ -347,36 +347,14 @@ if(!function_exists('doData')){
 						include_once($workingdir);
 						$wlang = $_lang;
 						if(count($wlang) > 0){
-							if(count($olang) > 0){
-								foreach($olang as $key => $value){
-									$entry['key'] = $key;	
-									$values = array('working'=>escapePlaceholders($value),'live'=> nl2br(escapePlaceholders(html_encode($value))));
-									if($wlang[$key] != $value){
-										if($wlang[$key] == null){
-											$wkey = $value;
-										}
-										else {
-											$wkey = $wlang[$key];
-										}	
-										$values = array('working'=>escapePlaceholders($wkey), 'live'=>nl2br(escapePlaceholders(html_encode($value))));
-									}else{
-										$values = array('working'=>escapePlaceholders($wlang[$key]),'live'=>nl2br(escapePlaceholders(html_encode($value))));
-									}
-									$entry['values'] = $values;
-									$flang[] = $entry;
-								}
+							foreach($wlang as $key => $value){
+								$entry['key'] = $key;
+								$entry['values'] = array('working'=>escapePlaceholders($value),'live'=>'');
+								$flang[] = $entry;
 							}
-							else{
-								foreach($wlang as $key => $value){
-									$entry['key'] = $key;
-									$entry['values'] = array('working'=>escapePlaceholders($value),'live'=>'');
-									$flang[] = $entry;
-								}
-								$response['success'] == 1;
-								$response['ready'] = 1;
-								$response['keys'] = $flang;
-								
-							}
+							$response['success'] == 1;
+							$response['ready'] = 1;
+							$response['keys'] = $flang;
 						}else{
 							if($lang == $cultureKey){	
 								$deleted = unlink($workingdir);
@@ -441,10 +419,12 @@ if(!function_exists('doData')){
 									$response['keys'] = $flang;
 								}
 								else{
-									foreach($wlang as $key => $value){
-										$entry['key'] = $key;
-										$entry['values'] = array('working'=>escapePlaceholders($value),'live'=>'');
-										$flang[] = $entry;
+									if(count($wlan) > 0){	
+										foreach($wlang as $key => $value){
+											$entry['key'] = $key;
+											$entry['values'] = array('working'=>escapePlaceholders($value),'live'=>'');
+											$flang[] = $entry;
+										}
 									}
 									$response['success'] == 1;
 									$response['ready'] = 1;
@@ -477,48 +457,65 @@ if(!function_exists('doSave')){
 			if($key != 'p' && $key != 't' && $key != 'l' && $key != 'a'){
 				$keys[$key] = $value;
 			}
-		}	
-		$file = fopen($workspace.$package.'/'.$lang.'/'.$topic.'.inc.php','wt');
-		fwrite($file,"<?php\n");
-		foreach($keys as $key => $value){
-			fwrite($file,'$_lang[\''.$key.'\'] = \''.str_replace("'","\'",$value).'\';'."\n");
 		}
-		fclose($file);
+		$file = fopen($workspace.$package.'/'.$lang.'/'.$topic.'.inc.php','wt');
+		if($file){
+			fwrite($file,"<?php\n");
+			foreach($keys as $key => $value){
+				fwrite($file,'$_lang[\''.$key.'\'] = \''.str_replace("'","\'",$value).'\';'."\n");
+			}
+			fclose($file);
+			if($options['log'] != null){
+				if(in_array('save',$options['log'])){
+					$message = '';
+					$action = 'save';
+					$language = $lang;
+					$lf = translexlog($message,$action,$package,$topic,$lang);
+				}
+			}
+			if(!empty($options['adminNotifyEmail'])){
+				$email = $options['adminNotifyEmail'];
+				$action = $modx->lexicon('translex.event_saved');
+				$package = ucwords($_POST['p']);
+				$topic = ucwords($_POST['t']);
+				$lang = ucwords($_POST['l']);
+				$site_name = $modx->getOption('site_name');
+				$inst = $action.$package.$topic.$lang;
+				if(!isset($_COOKIE['translex'])){
+					$insts[0] = $inst;
+					$instsSER = serialize($insts);
+					setcookie('translex',$instsSER);
+					notify($email,$action,$package,$topic,$lang,$site_name);
+				}else{
+					$instsSER = $_COOKIE['translex'];
+					$insts = unserialize($instsSER);
+					if(is_array($insts)){
+						if(!in_array($inst,$insts)){
+							$insts[] = $inst;
+							$instsJSON = json_encode($insts);
+							setcookie('translex',$instsJSON);
+							notify($email,$action,$package,$topic,$lang,$site_name);
+						}
+					}
+				}
+		}
+		$response['success'] = 1;
+		$response['message'] = $modx->lexicon('translex.saved_message');
+		return doJSON($response);
+	}else{
+		$error_message = $modx->lexicon('translex_saved_message_error');
 		if($options['log'] != null){
 			if(in_array('save',$options['log'])){
-				$message = '';
+				$message = $error_message;
 				$action = 'save';
 				$language = $lang;
 				$lf = translexlog($message,$action,$package,$topic,$lang);
 			}
-		}
-		if(!empty($options['adminNotifyEmail'])){
-		$email = $options['adminNotifyEmail'];
-		$action = $modx->lexicon('translex.event_saved');
-		$package = ucwords($_POST['p']);
-		$topic = ucwords($_POST['t']);
-		$lang = ucwords($_POST['l']);
-		$site_name = $modx->getOption('site_name');
-		$inst = $action.$package.$topic.$lang;
-		if(!isset($_COOKIE['translex'])){
-			$insts[0] = $inst;
-			$instsSER = serialize($insts);
-			setcookie('translex',$instsSER);
-			notify($email,$action,$package,$topic,$lang,$site_name);
-		}else{
-			$instsSER = $_COOKIE['translex'];
-			$insts = unserialize($instsSER);
-			if(!in_array($inst,$insts)){
-				$insts[] = $inst;
-				$instsJSON = json_encode($insts);
-				setcookie('translex',$instsJSON);
-				notify($email,$action,$package,$topic,$lang,$site_name);
-			}
-		}
+		}			
+		$response['success'] = 0;
+		$response['message'] = $error_message;
+		return doJSON($response);
 	}
-	$response['success'] = 1;
-	$response['message'] = $modx->lexicon('translex.saved_message');
-	return doJSON($response);
 }
 }
 

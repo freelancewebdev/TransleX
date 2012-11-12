@@ -1,4 +1,0 @@
-<select name="package" id="package">
-<option value="">[[%translex.please_choose? &namespace=`translex`]]</option>
-[[+packages]]
-</select>

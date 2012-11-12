@@ -1,3 +1,0 @@
-<select id="topic" name="topic">
-<option value="">[[%translex.please_choose? &namespace=`translex`]]
-</select>

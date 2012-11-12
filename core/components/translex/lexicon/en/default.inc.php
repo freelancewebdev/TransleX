@@ -30,6 +30,7 @@ $_lang['translex.current_live_value'] = 'Current Live Value';
 $_lang['translex.save'] = 'Save';
 $_lang['translex.saving'] = 'Saving, please wait...';
 $_lang['translex.saved_message'] = 'This lexicon has been saved to the appropriate directory within the working directory';
+$_lang['translex.saved_message_error'] = 'Saving this lexicon topic file has failed';
 $_lang['translex.make_live'] = 'Make Live';
 $_lang['translex.made_live_message'] = 'This lexicon has been made live';
 $_lang['translex.backup_failure_message'] = 'Backing up the live topic file has failed so it has not beeen updated';

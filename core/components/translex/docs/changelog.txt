@@ -42,3 +42,14 @@ Version 1.0 pl2
 2. Addition of adminNotify parameter for snippet call 
 3. Addition of log paramaeter for snippet call
 4. Addition of cultureKey parameter for snippet call
+
+
+Version 1.0 pl3
+------------------
+June 13th, 2012:  New default lexicon item fixes
+1. update of javascript chunk to deal with keys added to default lexicon
+2. Update of snippet to properly interrogate existing lexiocn files for pupulating the edit table.
+
+Version 1.0 pl4
+------------------
+November 12th, 2012; Fixed typo preventing the limiting of the available package list to those specified
