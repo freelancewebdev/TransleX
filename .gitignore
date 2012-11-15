@@ -3,3 +3,7 @@
 *.pyo
 .DS_Store
 .project
+
+._README
+
+._.gitignore

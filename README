@@ -21,7 +21,8 @@ Instructions
 and caching.  You should protect this page by adding it to a resource group accessible by the user(s) you which to give 
 access to.
 3. In the content field of the resource you created, simply call the snippet - [[!transleX]]
-4. Read on for further configuration.
+4. Ensure there is no other markup in the resource in which you have placed the snippet
+5. Read on for further configuration.
 
 
 Usage
