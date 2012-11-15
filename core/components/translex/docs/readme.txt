@@ -23,7 +23,8 @@ Instructions
 and caching.  You should protect this page by adding it to a resource group accessible by the user(s) you which to give 
 access to.
 3. In the content field of the resource you created, simply call the snippet - [[!transleX]]
-4. Read on for further configuration.
+4. Ensure that there is no other markup present in the page you are using. 
+5. Read on for further configuration.
 
 
 Usage
@@ -68,7 +69,7 @@ topics:			A comma delimited list of the topic names you wish the translator to w
 				By default, all topic files for a given package will be available.
 langauages: 	A comma delimited list of the languages you wish the translator to work with.  These languages are given in 2 letter code form.
 				By default, the translator may work with all languages available.
-adminNotify:	An email address to send notifications to when a topic file is saved.  Only one email will be sent per package, topic, language 
+adminNotifyEmail:	An email address to send notifications to when a topic file is saved.  Only one email will be sent per package, topic, language 
 				combination per session.
 				By default, no notification is sent.
 cultureKey:		You can override the site cultureKey setting to have the tool interface display in another language of your choice.  Once again, 
