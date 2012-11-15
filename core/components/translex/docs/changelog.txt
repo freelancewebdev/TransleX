@@ -52,4 +52,10 @@ June 13th, 2012:  New default lexicon item fixes
 
 Version 1.0 pl4
 ------------------
-November 12th, 2012; Fixed typo preventing the limiting of the available package list to those specified.
+November 12th, 2012; Fixed typo preventing the limiting of the available package list to those specified
+
+Version 1.0 pl5
+------------------
+November 13th, 2012; 
+1. Fixed issue where E_NOTICE errors were breaking JSON output
+2. Updated readme to stress that no other markup should be present in the resource holding the snippet
