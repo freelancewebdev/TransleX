@@ -1,10 +1,44 @@
 <?php
+
 $core_path = '';
 $packages_path = '';
 $packagedirs = array();
 $packagelist = array();
 $workspace = '';
 $options = array();
+
+
+if(isset($scriptProperties['packages'])){
+	$packages = $scriptProperties['packages'];
+}else{
+	$packages = '';
+}
+if(isset($scriptProperties['topics'])){
+	$topics = $scriptProperties['topics'];
+}
+else{
+	$topics = '';
+}
+if(isset($scriptProperties['languages'])){
+	$languages = $scriptProperties['languages'];
+}else{
+	$languages = '';
+}
+if(isset($scriptProperties['cultureKey'])){
+	$cultureKey = $scriptProperties['cultureKey'];
+}else{
+	$cultureKey = '';
+}
+if(isset($scriptProperties['adminNotifyEmail'])){
+$adminNotifyEmail = $scriptProperties['adminNotifyEmail'];
+}else{
+	$adminNotifyEmail = '';
+}
+if(isset($scriptProperties['log'])){
+	$log = $scriptProperties['log'];
+}else{
+	$log = '';
+}
 
 //Gather snippet properties
 $options['packages'] = trim($packages);
@@ -119,7 +153,8 @@ if(!function_exists('doInterface')){
 				exit();
 			}
 		}
-
+$innerpackages = '';
+$outerpackages = '';
 		foreach($packagelist as $packagename){
 			$innerpackages .= $modx->getChunk('translex_package_list_row',array('package' => $packagename));
 		}
@@ -128,6 +163,7 @@ if(!function_exists('doInterface')){
 			if($language == $cultureKey){
 				$language = $language.' ('.$modx->lexicon('translex.default').')';
 			}
+			$innerlanguages = '';
 			$innerlanguages .= $modx->getChunk('translex_language_list_row',array('language' => $language));
 		}
 		$outerlanguages = $modx->getChunk('translex_language_list_container',array('languages' => $innerlanguages));	
@@ -139,17 +175,19 @@ if(!function_exists('doInterface')){
 			'topics' => $outertopics
 		);
 		$markup = $modx->getChunk('translex_settings_form',$settings_form_elements);
-		if($options['log'] != null){
-			if(in_array('access',$options['log'])){
-				$message = '';
-				$action = 'access';
-				$package = '';
-				$topic = '';
-				$language = $cultureKey;
-				$lf = translexlog($message,$action,$package,$topic,$lang);
-				if(!$lf){
-					echo '<p>'.$modx->lexicon('translex.logfile_create_failed_message').'</p>';
-					exit();
+		if(isset($options['log'])){
+			if($options['log']!= null){
+				if(in_array('access',$options['log'])){
+					$message = '';
+					$action = 'access';
+					$package = '';
+					$topic = '';
+					$language = $cultureKey;
+					$lf = translexlog($message,$action,$package,$topic,$lang);
+					if(!$lf){
+						echo '<p>'.$modx->lexicon('translex.logfile_create_failed_message').'</p>';
+						exit();
+					}
 				}
 			}
 		}
@@ -162,9 +200,8 @@ if(!function_exists('doData')){
 	function doData($options){
 		global $modx, $workspace, $core_path, $packages_path, $packagedirs, $packagelist, $languages;		
 		getSettings($options);
-		
-		$modx->lexicon->load('translex:default');
 		$response = array();
+		$modx->lexicon->load('translex:default');
 		$cultureKey = $options['cultureKey'];
 		if(empty($cultureKey)){
 			$cultureKey = $modx->cultureKey;
@@ -352,7 +389,7 @@ if(!function_exists('doData')){
 								$entry['values'] = array('working'=>escapePlaceholders($value),'live'=>'');
 								$flang[] = $entry;
 							}
-							$response['success'] == 1;
+							$response['success'] = 1;
 							$response['ready'] = 1;
 							$response['keys'] = $flang;
 						}else{
@@ -444,7 +481,8 @@ if(!function_exists('doData')){
 }
 if(!function_exists('doSave')){
 	function doSave($options){
-		global $modx, $workspace, $core_path, $packages_path, $packagedirs, $packagelist, $languages;		
+		global $modx, $workspace, $core_path, $packages_path, $packagedirs, $packagelist, $languages;
+		$response = array();		
 		getSettings($options);
 		$modx->lexicon->load('translex:default');
 		$package = $_POST['p'];
@@ -521,7 +559,8 @@ if(!function_exists('doSave')){
 
 if(!function_exists('doCommit')){
 	function doCommit($options){
-		global $modx, $workspace, $core_path, $packages_path, $packagedirs, $packagelist, $languages;		
+		global $modx, $workspace, $core_path, $packages_path, $packagedirs, $packagelist, $languages;
+		$response = array();		
 		getSettings($options);
 		$modx->lexicon->load('translex:default');
 		$package = $_POST['p'];
@@ -709,6 +748,7 @@ if(!function_exists('translexlog')){
 if(!function_exists('doLogFile')){
 	function doLogFile(){
 		global $modx;
+		$response = array();
 		$modx->lexicon->load('translex:default');
 		$logfile = $modx->getOption('core_path').'components/translex/workspace/translex.log';
 		$logEntries = array();
@@ -737,6 +777,7 @@ if(!function_exists('doLogFile')){
 if(!function_exists('clearLogFile')){
 	function clearLogFile(){
 		global $modx;
+		$response = array();
 		$modx->lexicon->load('translex:default');
 		$logfile = $modx->getOption('core_path').'components/translex/workspace/translex.log';
 		if(file_exists($logfile)){
@@ -750,24 +791,28 @@ if(!function_exists('clearLogFile')){
 	
 }
 
-if(!$_POST){
-	$o = doInterface($options);
-}else{
-	switch($_POST['a']){
-		case '':
+switch($_SERVER['REQUEST_METHOD']){
+	case 'GET':
+		$o = doInterface($options);
+		break;
+	case 'POST':
+		if(!isset($_POST['a'])){
 			$o = doData($options);
-			break;
-		case 's':
-			$o = doSave($options);
-			break;
-		case 'c':
-			$o = doCommit($options);
-			break;
-		case 'lf':
-			$o = doLogFile();
-			break;
-		case 'dlf':
-			$o = clearLogFile();
-			break;
-	}
+		}else{
+			switch($_POST['a']){
+				case 's':
+					$o = doSave($options);
+					break;
+				case 'c':
+					$o = doCommit($options);
+					break;
+				case 'lf':
+					$o = doLogFile();
+					break;
+				case 'dlf':
+					$o = clearLogFile();
+					break;
+			}
+		}
+		break;
 }
