@@ -158,12 +158,13 @@ $outerpackages = '';
 		foreach($packagelist as $packagename){
 			$innerpackages .= $modx->getChunk('translex_package_list_row',array('package' => $packagename));
 		}
+		$innerlanguages = '';
+			
 		$outerpackages = $modx->getChunk('translex_package_list_container',array('packages' => $innerpackages));
 		foreach($languages as $language){
 			if($language == $cultureKey){
 				$language = $language.' ('.$modx->lexicon('translex.default').')';
 			}
-			$innerlanguages = '';
 			$innerlanguages .= $modx->getChunk('translex_language_list_row',array('language' => $language));
 		}
 		$outerlanguages = $modx->getChunk('translex_language_list_container',array('languages' => $innerlanguages));	
