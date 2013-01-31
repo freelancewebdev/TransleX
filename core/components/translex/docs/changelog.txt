@@ -59,3 +59,7 @@ Version 1.0 pl5
 November 13th, 2012; 
 1. Fixed issue where E_NOTICE errors were breaking JSON output
 2. Updated readme to stress that no other markup should be present in the resource holding the snippet
+
+Version 1.0 pl6
+January 30th, 2013
+1. Fixed issue with parsing of language parameters
