@@ -1,63 +1,99 @@
 --------------------
+
 TransleX
+
 --------------------
 
-
 Version 1.0 rc1
+
 ---------------
+
 April 21st, 2012: Initial verion 1.0 rc1 release.
 
-
 Version 1.0 pl
+
 ---------------
+
 April 22nd, 2012: Post Mark Hamstra release.
 
 1. Fixed issue with placeholders not showing
+
 2. Fixed issue where HTML tags were not displayed
+
 3. Added autosizing to text fields
+
 4. Changed Edit label to Contribute in English lexicon topic file
+
 5. Minified CSS
+
 6. Cached JS chunk
+
 7. Modified behaviour of addon when a topic file is first created in the workspace
+
 directory so that it is populated by the live topic file entries if that file exists.
+
 8. Fixed an issue with the language select element in Chrome where clearing the selection was adding a blank option
+
 9. Preserved linebreaks in the topic file values
+
 10. Added proper string escaping on save and commit.
+
 11. Added anchor link at bottom of table when it has more than 5 rows to enable a quick return 
+
 to the top of the interface
 
 Version 1.0 pl1
+
 ----------------
+
 April 22nd, 2012: Post foreign lexicon addition fixes
 
 1. Added all languages supported by MODX Manager to Languages select
+
 2. Added topic files for de, pt and zh
+
 3. Updated country code for Simplified Chinese to zh
+
 4. Replaced htmlentites function with a UTF8-safe version
+
 5. Changed the 'Edit' label and lexicon key to 'Contribute'
 
 Version 1.0 pl2
+
 ------------------
+
 1. Various fixes to naming consistencies in lexicon topic file
+
 2. Addition of adminNotify parameter for snippet call 
+
 3. Addition of log paramaeter for snippet call
+
 4. Addition of cultureKey parameter for snippet call
 
-
 Version 1.0 pl3
+
 ------------------
+
 June 13th, 2012:  New default lexicon item fixes
+
 1. update of javascript chunk to deal with keys added to default lexicon
+
 2. Update of snippet to properly interrogate existing lexiocn files for pupulating the edit table.
 
 Version 1.0 pl4
+
 ------------------
-November 12th, 2012; Fixed typo preventing the limiting of the available package list to those specified
+
+November 12th, 2012; Fixed typo preventing the limiting of the available package list to those specified.
 
 Version 1.0 pl5
+
 ------------------
+
 November 13th, 2012; 
+
 1. Fixed issue where E_NOTICE errors were breaking JSON output
+
 2. Updated readme to stress that no other markup should be present in the resource holding the snippet
 
 Version 1.0 pl6

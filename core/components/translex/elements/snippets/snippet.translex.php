@@ -155,11 +155,11 @@ if(!function_exists('doInterface')){
 		}
 $innerpackages = '';
 $outerpackages = '';
+$innerlanguages = '';
+			
 		foreach($packagelist as $packagename){
 			$innerpackages .= $modx->getChunk('translex_package_list_row',array('package' => $packagename));
 		}
-		$innerlanguages = '';
-			
 		$outerpackages = $modx->getChunk('translex_package_list_container',array('packages' => $innerpackages));
 		foreach($languages as $language){
 			if($language == $cultureKey){
